@@ -4,11 +4,9 @@ import android.support.v4.util.Pools;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.swmansion.gesturehandler.GestureHandler;
-
-import javax.annotation.Nullable;
 
 public class RNGestureHandlerEvent extends Event<RNGestureHandlerEvent> {
 
@@ -20,36 +18,46 @@ public class RNGestureHandlerEvent extends Event<RNGestureHandlerEvent> {
           new Pools.SynchronizedPool<>(TOUCH_EVENTS_POOL_SIZE);
 
   public static RNGestureHandlerEvent obtain(
-          GestureHandler handler,
-          @Nullable RNGestureHandlerEventDataExtractor dataExtractor) {
+          int viewTag,
+          int handlerTag,
+          int state,
+          float viewX,
+          float viewY,
+          float translationX,
+          float translationY) {
     RNGestureHandlerEvent event = EVENTS_POOL.acquire();
     if (event == null) {
       event = new RNGestureHandlerEvent();
     }
-    event.init(handler, dataExtractor);
+    event.init(viewTag, handlerTag, state, viewX, viewY, translationX, translationY);
     return event;
   }
 
-  private WritableMap mExtraData;
+  private int mState, mHandlerTag;
+  private float mViewX, mViewY, mTranslationY, mTranslationX;
 
   private RNGestureHandlerEvent() {
   }
 
   private void init(
-          GestureHandler handler,
-          @Nullable RNGestureHandlerEventDataExtractor dataExtractor) {
-    super.init(handler.getView().getId());
-    mExtraData = Arguments.createMap();
-    if (dataExtractor != null) {
-      dataExtractor.extractEventData(handler, mExtraData);
-    }
-    mExtraData.putInt("handlerTag", handler.getTag());
-    mExtraData.putInt("state", handler.getState());
+          int viewTag,
+          int handlerTag,
+          int state,
+          float viewX,
+          float viewY,
+          float translationX,
+          float translationY) {
+    super.init(viewTag);
+    mHandlerTag = handlerTag;
+    mState = state;
+    mViewX = viewX;
+    mViewY = viewY;
+    mTranslationX = translationX;
+    mTranslationY = translationY;
   }
 
   @Override
   public void onDispose() {
-    mExtraData = null;
     EVENTS_POOL.release(this);
   }
 
@@ -72,6 +80,15 @@ public class RNGestureHandlerEvent extends Event<RNGestureHandlerEvent> {
 
   @Override
   public void dispatch(RCTEventEmitter rctEventEmitter) {
-    rctEventEmitter.receiveEvent(getViewTag(), EVENT_NAME, mExtraData);
+    WritableMap data = Arguments.createMap();
+    data.putInt("handlerTag", mHandlerTag);
+    data.putInt("state", mState);
+    data.putDouble("x", PixelUtil.toDIPFromPixel(mViewX));
+    data.putDouble("y", PixelUtil.toDIPFromPixel(mViewY));
+    if (!Float.isNaN(mTranslationX)) {
+      data.putDouble("translationX", PixelUtil.toDIPFromPixel(mTranslationX));
+      data.putDouble("translationY", PixelUtil.toDIPFromPixel(mTranslationY));
+    }
+    rctEventEmitter.receiveEvent(getViewTag(), EVENT_NAME, data);
   }
 }
