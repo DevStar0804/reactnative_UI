@@ -3,20 +3,18 @@
 #import <React/RCTLog.h>
 #import <React/RCTViewManager.h>
 #import <React/RCTComponent.h>
-#import <React/RCTUIManager.h>
-#import <React/RCTUIManagerObserverCoordinator.h>
 
 #import "RNGestureHandlerState.h"
 #import "RNGestureHandler.h"
-#import "RNGestureHandlerManager.h"
 
-@interface RNGestureHandlerModule () <RCTUIManagerObserver>
+@interface RNGestureHandlerModule () <RNGestureHandlerEventEmitter>
 
 @end
 
 
 @interface RNDummyViewManager : RCTViewManager
 @end
+
 
 @implementation RNDummyViewManager
 
@@ -28,108 +26,74 @@ RCT_EXPORT_VIEW_PROPERTY(onGestureHandlerStateChange, RCTDirectEventBlock)
 @end
 
 
-@interface RNGestureHandlerButtonManager : RCTViewManager
-@end
-
-@implementation RNGestureHandlerButtonManager
-
-RCT_EXPORT_MODULE(RNGestureHandlerButton)
-
-RCT_EXPORT_VIEW_PROPERTY(enabled, BOOL)
-
-- (UIView *)view
-{
-    return [RNGestureHandlerButton new];
-}
-
-@end
-
-
-typedef void (^GestureHandlerOperation)(RNGestureHandlerManager *manager);
-
 @implementation RNGestureHandlerModule
 {
-    RNGestureHandlerManager *_manager;
-
-    // Oparations called after views have been updated.
-    NSMutableArray<GestureHandlerOperation> *_operations;
+    NSMutableDictionary<NSNumber *, NSMutableArray<RNGestureHandler *>* > *_gestureHandlers;
 }
 
 RCT_EXPORT_MODULE()
 
 - (dispatch_queue_t)methodQueue
 {
-    // This module needs to be on the same queue as the UIManager to avoid
-    // having to lock `_operations` and `_preOperations` since `uiManagerWillFlushUIBlocks`
-    // will be called from that queue.
-
-    // This is required as this module rely on having all the view nodes created before
-    // gesture handlers can be associated with them
-    return RCTGetUIManagerQueue();
+    return dispatch_get_main_queue();
 }
 
 - (void)setBridge:(RCTBridge *)bridge
 {
     [super setBridge:bridge];
 
-    _manager = [[RNGestureHandlerManager alloc]
-                initWithUIManager:bridge.uiManager
-                eventDispatcher:bridge.eventDispatcher];
-    _operations = [NSMutableArray new];
-    [bridge.uiManager.observerCoordinator addObserver:self];
+    _gestureHandlers = [NSMutableDictionary new];
 }
 
 RCT_EXPORT_METHOD(createGestureHandler:(nonnull NSNumber *)viewTag withName:(nonnull NSString *)handlerName tag:(nonnull NSNumber *)handlerTag config:(NSDictionary *)config)
 {
-    [self addOperationBlock:^(RNGestureHandlerManager *manager) {
-        [manager createGestureHandler:viewTag withName:handlerName tag:handlerTag config:config];
-    }];
+    static NSDictionary *map;
+    static dispatch_once_t mapToken;
+    dispatch_once(&mapToken, ^{
+        map = @{
+                @"PanGestureHandler" : [RNPanGestureHandler class],
+                @"TapGestureHandler" : [RNTapGestureHandler class],
+                @"LongPressGestureHandler": [RNLongPressGestureHandler class],
+                @"NativeViewGestureHandler": [RNNativeViewGestureHandler class],
+                };
+    });
+    
+    Class nodeClass = map[handlerName];
+    if (!nodeClass) {
+        RCTLogError(@"Gesture handler type %@ is not supported", handlerName);
+        return;
+    }
+    
+    RNGestureHandler *gestureHandler = [[nodeClass alloc] initWithTag:handlerTag config:config];
+    NSMutableArray *handlersArray = _gestureHandlers[viewTag];
+    if (handlersArray == nil) {
+        handlersArray = [NSMutableArray new];
+        _gestureHandlers[viewTag] = handlersArray;
+    }
+    [handlersArray addObject:gestureHandler];
+    gestureHandler.emitter = self;
+    
+    UIView *view = [self.bridge.uiManager viewForReactTag:viewTag];
+    [gestureHandler bindToView:view];
 }
 
 RCT_EXPORT_METHOD(dropGestureHandlersForView:(nonnull NSNumber *)viewTag)
 {
-    [self addOperationBlock:^(RNGestureHandlerManager *manager) {
-        [manager dropGestureHandlersForView:viewTag];
-    }];
+    NSMutableArray *handlersArray = _gestureHandlers[viewTag];
+    for (RNGestureHandler *handler in handlersArray) {
+        [handler unbindFromView];
+    }
+    [_gestureHandlers removeObjectForKey:viewTag];
 }
 
 RCT_EXPORT_METHOD(handleSetJSResponder:(nonnull NSNumber *)viewTag blockNativeResponder:(nonnull NSNumber *)blockNativeResponder)
 {
-    [self addOperationBlock:^(RNGestureHandlerManager *manager) {
-        [manager handleSetJSResponder:viewTag blockNativeResponder:blockNativeResponder];
-    }];
+    // TODO: js responder support
 }
 
 RCT_EXPORT_METHOD(handleClearJSResponder)
 {
-    [self addOperationBlock:^(RNGestureHandlerManager *manager) {
-        [manager handleClearJSResponder];
-    }];
-}
-
-#pragma mark -- Batch handling
-
-- (void)addOperationBlock:(GestureHandlerOperation)operation
-{
-    [_operations addObject:operation];
-}
-
-#pragma mark - RCTUIManagerObserver
-
-- (void)uiManagerWillFlushUIBlocks:(RCTUIManager *)uiManager
-{
-    if (_operations.count == 0) {
-        return;
-    }
-
-    NSArray<GestureHandlerOperation> *operations = _operations;
-    _operations = [NSMutableArray new];
-
-    [uiManager addUIBlock:^(__unused RCTUIManager *manager, __unused NSDictionary<NSNumber *, UIView *> *viewRegistry) {
-        for (GestureHandlerOperation operation in operations) {
-            operation(self->_manager);
-        }
-    }];
+    // TODO: js responder support
 }
 
 #pragma mark Events
@@ -137,6 +101,16 @@ RCT_EXPORT_METHOD(handleClearJSResponder)
 - (NSArray<NSString *> *)supportedEvents
 {
     return @[@"onGestureHandlerEvent", @"onGestureHandlerStateChange"];
+}
+
+- (void)sendTouchEvent:(RNGestureHandlerEvent *)event
+{
+    [self.bridge.eventDispatcher sendEvent:event];
+}
+
+- (void)sendStateChangeEvent:(RNGestureHandlerStateChange *)event
+{
+    [self.bridge.eventDispatcher sendEvent:event];
 }
 
 #pragma mark Module Constants
@@ -157,4 +131,4 @@ RCT_EXPORT_METHOD(handleClearJSResponder)
 
 
 @end
-
+  

@@ -13,6 +13,7 @@ public class LongPressGestureHandler extends GestureHandler<LongPressGestureHand
 
   public LongPressGestureHandler() {
     setShouldCancelWhenOutside(true);
+    setShouldCancelOthersWhenActivated(true);
   }
 
   public void setMinDurationMs(long minDurationMs) {
