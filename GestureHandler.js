@@ -51,7 +51,10 @@ const GestureHandlerPropTypes = {
       horizontal: PropTypes.number,
     }),
   ]),
-  onGestureEvent: PropTypes.func,
+  onGestureEvent: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.object,
+  ]),
   onHandlerStateChange: PropTypes.func,
 }
 
@@ -196,7 +199,6 @@ const LongPressGestureHandler = createHandler('LongPressGestureHandler', {
 const PanGestureHandler = createHandler('PanGestureHandler', {
   minDeltaX: PropTypes.number,
   minDeltaY: PropTypes.number,
-  maxDeltaX: PropTypes.number,
   minOffsetX: PropTypes.number,
   minOffsetY: PropTypes.number,
   minDist: PropTypes.number,
