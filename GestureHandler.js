@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import {
   findNodeHandle,
   requireNativeComponent,
@@ -16,7 +16,6 @@ import {
   Platform,
 } from 'react-native';
 import deepEqual from 'fbjs/lib/areEqual';
-import PropTypes from 'prop-types';
 
 const RNGestureHandlerModule = NativeModules.RNGestureHandlerModule;
 
