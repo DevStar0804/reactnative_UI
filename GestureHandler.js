@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import {
   findNodeHandle,
   requireNativeComponent,
@@ -16,6 +16,7 @@ import {
   Platform,
 } from 'react-native';
 import deepEqual from 'fbjs/lib/areEqual';
+import PropTypes from 'prop-types';
 
 const RNGestureHandlerModule = NativeModules.RNGestureHandlerModule;
 
@@ -281,9 +282,6 @@ function createNativeWrapper(Component, config = {}) {
 
       // bind native component's methods
       for (let methodName in node) {
-        if (methodName === 'replaceState' || methodName === 'isMounted') {
-          continue;
-        }
         const method = node[methodName];
         if (
           !methodName.startsWith('_') &&
