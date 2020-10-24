@@ -33,7 +33,8 @@
     return self;
 }
 
-- (void)createGestureHandler:(NSString *)handlerName
+- (void)createGestureHandler:(NSNumber *)viewTag
+                    withName:(NSString *)handlerName
                          tag:(NSNumber *)handlerTag
                       config:(NSDictionary *)config
 {
@@ -58,33 +59,35 @@
     
     RNGestureHandler *gestureHandler = [[nodeClass alloc] initWithTag:handlerTag];
     [gestureHandler configure:config];
-    [_registry registerGestureHandler:gestureHandler];
+    [_registry registerGestureHandler:gestureHandler forViewWithTag:viewTag];
     
     __weak id<RNGestureHandlerEventEmitter> emitter = self;
     gestureHandler.emitter = emitter;
-}
-
-
-- (void)attachGestureHandler:(nonnull NSNumber *)handlerTag
-               toViewWithTag:(nonnull NSNumber *)viewTag
-{
+        
     UIView *view = [_uiManager viewForReactTag:viewTag];
-
-    [_registry attachHandlerWithTag:handlerTag toView:view];
-
+    [gestureHandler bindToView:view];
+    
     // register root view if not already there
     [self registerRootViewIfNeeded:view];
 }
 
-- (void)updateGestureHandler:(NSNumber *)handlerTag config:(NSDictionary *)config
+- (void)updateGestureHandler:(NSNumber *)viewTag
+                         tag:(NSNumber *)handlerTag
+                      config:(NSDictionary *)config
 {
-    RNGestureHandler *handler = [_registry handlerWithTag:handlerTag];
-    [handler configure:config];
+    NSArray<RNGestureHandler*> *handlers = [_registry
+                                            gestureHandlersForViewWithTag:viewTag
+                                            andTag:handlerTag];
+    for (RNGestureHandler *handler in handlers) {
+        if ([handler.tag isEqual:handlerTag]) {
+            [handler configure:config];
+        }
+    }
 }
 
-- (void)dropGestureHandler:(NSNumber *)handlerTag
+- (void)dropGestureHandlersForView:(NSNumber *)viewTag
 {
-    [_registry dropHandlerWithTag:handlerTag];
+    [_registry dropGestureHandlersForViewWithTag:viewTag];
 }
 
 - (void)handleSetJSResponder:(NSNumber *)viewTag blockNativeResponder:(NSNumber *)blockNativeResponder
