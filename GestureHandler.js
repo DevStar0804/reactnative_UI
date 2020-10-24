@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import {
   findNodeHandle,
   requireNativeComponent,
@@ -16,6 +16,7 @@ import {
   Platform,
 } from 'react-native';
 import deepEqual from 'fbjs/lib/areEqual';
+import PropTypes from 'prop-types';
 
 const RNGestureHandlerModule = NativeModules.RNGestureHandlerModule;
 
@@ -287,6 +288,9 @@ function createNativeWrapper(Component, config = {}) {
 
       // bind native component's methods
       for (let methodName in node) {
+        if (methodName === 'replaceState' || methodName === 'isMounted') {
+          continue;
+        }
         const method = node[methodName];
         if (
           !methodName.startsWith('_') &&
@@ -436,6 +440,8 @@ class BaseButton extends React.Component {
   }
 }
 
+const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
+
 const btnStyles = StyleSheet.create({
   underlay: {
     position: 'absolute',
@@ -493,20 +499,15 @@ class BorderlessButton extends React.Component {
         this._opacity.setValue(active ? this.props.activeOpacity : 1);
       };
   render() {
-    const { children, ...rest } = this.props;
-    const content =
-      Platform.OS === 'android'
-        ? children
-        : <Animated.View style={{ opacity: this._opacity }}>
-            {children}
-          </Animated.View>;
+    const { children, style, ...rest } = this.props;
     return (
-      <BaseButton
+      <AnimatedBaseButton
         borderless={true}
         {...rest}
-        onActiveStateChange={this._handleActiveStateChange}>
-        {content}
-      </BaseButton>
+        onActiveStateChange={this._handleActiveStateChange}
+        style={[style, Platform.OS === 'ios' && { opacity: this._opacity }]}>
+        {children}
+      </AnimatedBaseButton>
     );
   }
 }
