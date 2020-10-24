@@ -141,37 +141,30 @@ function createHandler(handlerName, propTypes = null, config = {}) {
     };
 
     componentWillUnmount() {
-      RNGestureHandlerModule.dropGestureHandler(this._handlerTag);
+      const viewTag = findNodeHandle(this._viewNode);
+      RNGestureHandlerModule.dropGestureHandlersForView(viewTag);
       if (this.props.id) {
         delete handlerIDToTag[this.props.id];
       }
     }
 
     componentDidMount() {
-      this._viewTag = findNodeHandle(this._viewNode);
+      const viewTag = findNodeHandle(this._viewNode);
       this._config = filterConfig(
         this.props,
         this.constructor.propTypes,
         config
       );
       RNGestureHandlerModule.createGestureHandler(
+        viewTag,
         handlerName,
         this._handlerTag,
         this._config
-      );
-      RNGestureHandlerModule.attachGestureHandler(
-        this._handlerTag,
-        this._viewTag
       );
     }
 
     componentDidUpdate(prevProps, prevState) {
       const viewTag = findNodeHandle(this._viewNode);
-      if (this._viewTag !== viewTag) {
-        this._viewTag = viewTag;
-        RNGestureHandlerModule.attachGestureHandler(this._handlerTag, viewTag);
-      }
-
       const newConfig = filterConfig(
         this.props,
         this.constructor.propTypes,
@@ -180,6 +173,7 @@ function createHandler(handlerName, propTypes = null, config = {}) {
       if (!deepEqual(this._config, newConfig)) {
         this._config = newConfig;
         RNGestureHandlerModule.updateGestureHandler(
+          viewTag,
           this._handlerTag,
           this._config
         );
@@ -299,37 +293,30 @@ function createNativeWrapper(Component, config = {}) {
     };
 
     componentWillUnmount() {
-      RNGestureHandlerModule.dropGestureHandler(this._handlerTag);
+      const viewTag = findNodeHandle(this._viewNode);
+      RNGestureHandlerModule.dropGestureHandlersForView(viewTag);
       if (this.props.id) {
         delete handlerIDToTag[this.props.id];
       }
     }
 
     componentDidMount() {
-      this._viewTag = findNodeHandle(this._viewNode);
+      const viewTag = findNodeHandle(this._viewNode);
       this._config = filterConfig(
         this.props,
         NativeViewGestureHandler.propTypes,
         config
       );
       RNGestureHandlerModule.createGestureHandler(
+        viewTag,
         'NativeViewGestureHandler',
         this._handlerTag,
         this._config
-      );
-      RNGestureHandlerModule.attachGestureHandler(
-        this._handlerTag,
-        this._viewTag
       );
     }
 
     componentDidUpdate(prevProps, prevState) {
       const viewTag = findNodeHandle(this._viewNode);
-      if (this._viewTag !== viewTag) {
-        this._viewTag = viewTag;
-        RNGestureHandlerModule.attachGestureHandler(this._handlerTag, viewTag);
-      }
-
       const newConfig = filterConfig(
         this.props,
         NativeViewGestureHandler.propTypes,
@@ -436,6 +423,8 @@ class BaseButton extends React.Component {
   }
 }
 
+const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
+
 const btnStyles = StyleSheet.create({
   underlay: {
     position: 'absolute',
@@ -493,20 +482,15 @@ class BorderlessButton extends React.Component {
         this._opacity.setValue(active ? this.props.activeOpacity : 1);
       };
   render() {
-    const { children, ...rest } = this.props;
-    const content =
-      Platform.OS === 'android'
-        ? children
-        : <Animated.View style={{ opacity: this._opacity }}>
-            {children}
-          </Animated.View>;
+    const { children, style, ...rest } = this.props;
     return (
-      <BaseButton
+      <AnimatedBaseButton
         borderless={true}
         {...rest}
-        onActiveStateChange={this._handleActiveStateChange}>
-        {content}
-      </BaseButton>
+        onActiveStateChange={this._handleActiveStateChange}
+        style={[style, Platform.OS === 'ios' && { opacity: this._opacity }]}>
+        {children}
+      </AnimatedBaseButton>
     );
   }
 }

@@ -44,10 +44,9 @@
 
 @interface RNGestureHandlerRegistry : NSObject
 
-- (RNGestureHandler *)handlerWithTag:(NSNumber *)handlerTag;
-- (void)registerGestureHandler:(RNGestureHandler *)gestureHandler;
-- (void)attachHandlerWithTag:(NSNumber *)handlerTag toView:(UIView *)view;
-- (void)dropHandlerWithTag:(NSNumber *)handlerTag;
+- (void)registerGestureHandler:(RNGestureHandler *)gestureHandler forViewWithTag:(NSNumber *)viewTag;
+- (void)dropGestureHandlersForViewWithTag:(NSNumber *)viewTag;
+- (NSArray<RNGestureHandler*> *)gestureHandlersForViewWithTag:(NSNumber *)viewTag andTag:(NSNumber *)handlerTag;
 - (RNGestureHandler *)findGestureHandlerByRecognizer:(UIGestureRecognizer *)recognizer;
 
 @end
