@@ -98,7 +98,7 @@ Library exports a `State` object that provides a number of constants used to exp
  - `shouldCancelWhenOutside`
  - `simultaneousHandlers`
  - `waitFor`
- - `hitSlop` (**accepts only negative values on iOS**)
+ - `hitSlop` (**Android only**)
  - `onGestureEvent`
  - `onHandlerStateChange`
 
