@@ -3,23 +3,6 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <React/RCTConvert.h>
-
-#define VEC_LEN_SQ(pt) (pt.x * pt.x + pt.y * pt.y)
-#define TEST_MIN_IF_NOT_NAN(value, limit) \
-(!isnan(limit) && ((limit < 0 && value <= limit) || (limit >= 0 && value >= limit)))
-
-#define TEST_MAX_IF_NOT_NAN(value, max) \
-(!isnan(max) && ((max < 0 && value < max) || (max >= 0 && value > max)))
-
-#define APPLY_PROP(recognizer, config, type, prop, propName) do { \
-id value = config[propName]; \
-if (value != nil) recognizer.prop = [RCTConvert type:value]; \
-} while(0)
-
-#define APPLY_FLOAT_PROP(prop) do { APPLY_PROP(recognizer, config, CGFloat, prop, @#prop); } while(0)
-#define APPLY_INT_PROP(prop) do { APPLY_PROP(recognizer, config, NSInteger, prop, @#prop); } while(0)
-#define APPLY_NAMED_INT_PROP(prop, propName) do { APPLY_PROP(recognizer, config, NSInteger, prop, propName); } while(0)
 
 @protocol RNGestureHandlerEventEmitter
 
@@ -38,7 +21,7 @@ if (value != nil) recognizer.prop = [RCTConvert type:value]; \
 @end
 
 
-@interface RNGestureHandler : NSObject <UIGestureRecognizerDelegate> {
+@interface RNGestureHandler : NSObject {
 
 @protected UIGestureRecognizer *_recognizer;
 @protected RNGestureHandlerState _lastState;
@@ -53,7 +36,6 @@ if (value != nil) recognizer.prop = [RCTConvert type:value]; \
 @property (nonatomic, weak, nullable) id<RNGestureHandlerEventEmitter> emitter;
 @property (nonatomic, readonly, nullable) UIGestureRecognizer *recognizer;
 @property (nonatomic) BOOL enabled;
-@property(nonatomic) BOOL shouldCancelWhenOutside;
 
 - (void)bindToView:(nonnull UIView *)view;
 - (void)unbindFromView;
@@ -62,10 +44,44 @@ if (value != nil) recognizer.prop = [RCTConvert type:value]; \
 - (RNGestureHandlerState)state;
 - (nullable RNGestureHandlerEventExtraData *)eventExtraData:(nonnull id)recognizer;
 
-- (void)reset;
-- (void)sendEventsInState:(RNGestureHandlerState)state
-           forViewWithTag:(nonnull NSNumber *)reactTag
-            withExtraData:(RNGestureHandlerEventExtraData *)extraData;
+@end
 
+@interface RNGestureHandlerRegistry : NSObject
+
+- (nullable RNGestureHandler *)handlerWithTag:(nonnull NSNumber *)handlerTag;
+- (void)registerGestureHandler:(nonnull RNGestureHandler *)gestureHandler;
+- (void)attachHandlerWithTag:(nonnull NSNumber *)handlerTag toView:(nonnull UIView *)view;
+- (void)dropHandlerWithTag:(nonnull NSNumber *)handlerTag;
+
+@end
+
+
+@interface RNPanGestureHandler : RNGestureHandler
+@end
+
+@interface RNTapGestureHandler : RNGestureHandler
+@end
+
+@interface RNLongPressGestureHandler : RNGestureHandler
+@end
+
+@interface RNNativeViewGestureHandler : RNGestureHandler
+@end
+
+@interface RNPinchGestureHandler : RNGestureHandler
+@end
+
+@interface RNRotationGestureHandler : RNGestureHandler
+@end
+
+@interface RNRootViewGestureRecognizer : UIGestureRecognizer
+
+@property (nullable, nonatomic, weak) id<RNRootViewGestureRecognizerDelegate> delegate;
+
+- (void)blockOtherRecognizers;
+
+@end
+
+@interface RNGestureHandlerButton : UIControl
 @end
 
