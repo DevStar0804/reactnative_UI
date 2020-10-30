@@ -16,13 +16,6 @@ import {
 
 const DRAG_TOSS = 0.05;
 
-// Math.sign polyfill for iOS 8.x
-if (!Math.sign) {
-  Math.sign = function(x) {
-    return ((x > 0) - (x < 0)) || +x;
-  };
-}
-
 export type PropType = {
   children: any,
   friction: number,
