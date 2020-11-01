@@ -3,39 +3,38 @@ package com.swmansion.gesturehandler.react;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.facebook.react.uimanager.PointerEvents;
 import com.facebook.react.uimanager.ReactPointerEventsView;
 import com.facebook.react.views.view.ReactViewGroup;
-import com.swmansion.gesturehandler.PointerEventsConfig;
+import com.swmansion.gesturehandler.PointerEvents;
 import com.swmansion.gesturehandler.ViewConfigurationHelper;
 
 public class RNViewConfigurationHelper implements ViewConfigurationHelper {
 
   @Override
-  public PointerEventsConfig getPointerEventsConfigForView(View view) {
-    PointerEvents pointerEvents;
+  public PointerEvents getPointerEventsConfigForView(View view) {
+    com.facebook.react.uimanager.PointerEvents pointerEvents;
     pointerEvents = view instanceof ReactPointerEventsView ?
             ((ReactPointerEventsView) view).getPointerEvents() :
-            PointerEvents.AUTO;
+            com.facebook.react.uimanager.PointerEvents.AUTO;
 
     // Views that are disabled should never be the target of pointer events. However, their children
     // can be because some views (SwipeRefreshLayout) use enabled but still have children that can
     // be valid targets.
     if (!view.isEnabled()) {
-      if (pointerEvents == PointerEvents.AUTO) {
-        return PointerEventsConfig.BOX_NONE;
-      } else if (pointerEvents == PointerEvents.BOX_ONLY) {
-        return PointerEventsConfig.NONE;
+      if (pointerEvents == com.facebook.react.uimanager.PointerEvents.AUTO) {
+        return PointerEvents.BOX_NONE;
+      } else if (pointerEvents == com.facebook.react.uimanager.PointerEvents.BOX_ONLY) {
+        return PointerEvents.NONE;
       }
     }
 
     switch (pointerEvents) {
-      case BOX_ONLY: return PointerEventsConfig.BOX_ONLY;
-      case BOX_NONE: return PointerEventsConfig.BOX_NONE;
-      case NONE: return PointerEventsConfig.NONE;
+      case BOX_ONLY: return PointerEvents.BOX_ONLY;
+      case BOX_NONE: return PointerEvents.BOX_NONE;
+      case NONE: return PointerEvents.NONE;
     }
 
-    return PointerEventsConfig.AUTO;
+    return PointerEvents.AUTO;
   }
 
   @Override

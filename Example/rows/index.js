@@ -7,8 +7,6 @@ import {
   State,
   RectButton,
   BorderlessButton,
-  LongPressGestureHandler,
-  BaseButton,
 } from 'react-native-gesture-handler';
 
 import { USE_NATIVE_DRIVER } from '../config';
@@ -181,17 +179,6 @@ export default class Example extends Component {
               <InfoButton name="fourth" />
             </RectButton>
           </Swipeable>
-          <LongPressGestureHandler
-            onHandlerStateChange={({ nativeEvent }) =>
-              nativeEvent.state === State.ACTIVE && Alert.alert('Long')}>
-            <RectButton
-              style={styles.rectButton}
-              onPress={() => Alert.alert('Fifth row clicked')}>
-              <Text style={styles.buttonText}>
-                Clickable row with long press handler
-              </Text>
-            </RectButton>
-          </LongPressGestureHandler>
           <LoremIpsum />
         </ScrollView>
       </View>

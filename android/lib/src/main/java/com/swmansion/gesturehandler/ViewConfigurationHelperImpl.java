@@ -6,8 +6,8 @@ import android.view.ViewGroup;
 public class ViewConfigurationHelperImpl implements ViewConfigurationHelper {
 
   @Override
-  public PointerEventsConfig getPointerEventsConfigForView(View view) {
-    return view.isEnabled() ? PointerEventsConfig.AUTO : PointerEventsConfig.NONE;
+  public PointerEvents getPointerEventsConfigForView(View view) {
+    return view.isEnabled() ? PointerEvents.AUTO : PointerEvents.NONE;
   }
 
   @Override
