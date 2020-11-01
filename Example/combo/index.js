@@ -18,7 +18,7 @@ import {
   RectButton,
 } from 'react-native-gesture-handler';
 
-import { Swipeable, InfoButton } from '../swipeable';
+import { Swipeable, InfoButton } from '../rows';
 import { DraggableBox } from '../draggable';
 import { PinchableBox } from '../scaleAndRotate';
 import { PressBox } from '../multitap';
@@ -108,12 +108,14 @@ class ControlledSwitch extends React.Component {
 class Combo extends Component {
   _onClick = () => {
     Alert.alert("I'm so touched");
+    this._scrollView.scrollTo(200);
   };
   render() {
     const { ScrollViewComponent } = this.props;
     return (
       <View style={styles.container}>
         <ScrollViewComponent
+          ref={node => (this._scrollView = node)}
           waitFor={['dragbox', 'image_pinch', 'image_rotation', 'image_tilt']}
           style={styles.scrollView}>
           <TouchableHighlight style={styles.button} onClick={this._onClick}>
