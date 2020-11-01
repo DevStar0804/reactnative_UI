@@ -32,17 +32,5 @@
     }
 }
 
-- (RNGestureHandlerState)state
-{
-    // For long press recognizer we treat "Began" state as "active"
-    // as it changes its state to "Began" as soon as the the minimum
-    // hold duration timeout is reached, whereas state "Changed" is
-    // only set after "Began" phase if there is some movement.
-    if (_recognizer.state == UIGestureRecognizerStateBegan) {
-        return RNGestureHandlerStateActive;
-    }
-    return [super state];
-}
-
 @end
 

@@ -51,6 +51,11 @@ class MainScreen extends React.Component {
   static navigationOptions = {
     title: '✌️ Gesture Handler Demo',
   };
+  _onPressItem = ({ key }) => this.props.navigation.navigate(key);
+  _renderItem = props => (
+    <MainScreenItem {...props} onPressItem={this._onPressItem} />
+  );
+  _renderScroll = props => <ScrollView {...props} />;
   render() {
     const data = Object.keys(SCREENS).map(key => ({ key }));
     return (
@@ -58,13 +63,8 @@ class MainScreen extends React.Component {
         style={styles.list}
         data={data}
         ItemSeparatorComponent={ItemSeparator}
-        renderItem={props => (
-          <MainScreenItem
-            {...props}
-            onPressItem={({ key }) => this.props.navigation.navigate(key)}
-          />
-        )}
-        renderScrollComponent={props => <ScrollView {...props} />}
+        renderItem={this._renderItem}
+        renderScrollComponent={this._renderScroll}
       />
     );
   }

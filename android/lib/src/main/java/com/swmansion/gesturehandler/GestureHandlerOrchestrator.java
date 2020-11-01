@@ -1,5 +1,6 @@
 package com.swmansion.gesturehandler;
 
+import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.view.MotionEvent;
@@ -410,20 +411,20 @@ public class GestureHandlerOrchestrator {
   }
 
   private boolean traverseWithPointerEvents(View view, float coords[]) {
-    PointerEventsConfig pointerEvents = mViewConfigHelper.getPointerEventsConfigForView(view);
-    if (pointerEvents == PointerEventsConfig.NONE) {
+    PointerEvents pointerEvents = mViewConfigHelper.getPointerEventsConfigForView(view);
+    if (pointerEvents == PointerEvents.NONE) {
       // This view and its children can't be the target
       return false;
-    } else if (pointerEvents == PointerEventsConfig.BOX_ONLY) {
+    } else if (pointerEvents == PointerEvents.BOX_ONLY) {
       // This view is the target, its children don't matter
       return recordHandlerIfNotPresent(view, coords) || shouldHandlerlessViewBecomeTouchTarget(view, coords);
-    } else if (pointerEvents == PointerEventsConfig.BOX_NONE) {
+    } else if (pointerEvents == PointerEvents.BOX_NONE) {
       // This view can't be the target, but its children might
       if (view instanceof ViewGroup) {
         return extractGestureHandlers((ViewGroup) view, coords);
       }
       return false;
-    } else if (pointerEvents == PointerEventsConfig.AUTO) {
+    } else if (pointerEvents == PointerEvents.AUTO) {
       // Either this view or one of its children is the target
       boolean found = false;
       if (view instanceof ViewGroup) {
