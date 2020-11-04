@@ -23,8 +23,7 @@
     return [RNGestureHandlerEventExtraData
             forRotation:recognizer.rotation
             withAnchorPoint:[recognizer locationInView:recognizer.view]
-            withVelocity:recognizer.velocity
-            withNumberOfTouches:recognizer.numberOfTouches];
+            withVelocity:recognizer.velocity];
 }
 
 @end

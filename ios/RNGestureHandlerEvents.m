@@ -27,7 +27,6 @@
                       withAbsolutePosition:(CGPoint)absolutePosition
                            withTranslation:(CGPoint)translation
                               withVelocity:(CGPoint)velocity
-                       withNumberOfTouches:(NSUInteger)numberOfTouches
 {
     return [[RNGestureHandlerEventExtraData alloc]
             initWithData:@{
@@ -38,35 +37,30 @@
                            @"translationX": @(translation.x),
                            @"translationY": @(translation.y),
                            @"velocityX": SAFE_VELOCITY(velocity.x),
-                           @"velocityY": SAFE_VELOCITY(velocity.y),
-                           @"numberOfTouches": @(numberOfTouches)}];
+                           @"velocityY": SAFE_VELOCITY(velocity.y)}];
 }
 
 + (RNGestureHandlerEventExtraData *)forPinch:(CGFloat)scale
                               withFocalPoint:(CGPoint)focalPoint
                                 withVelocity:(CGFloat)velocity
-                         withNumberOfTouches:(NSUInteger)numberOfTouches
 {
     return [[RNGestureHandlerEventExtraData alloc]
             initWithData:@{
                            @"scale": @(scale),
                            @"focalX": @(focalPoint.x),
                            @"focalY": @(focalPoint.y),
-                           @"velocity": SAFE_VELOCITY(velocity),
-                           @"numberOfTouches": @(numberOfTouches)}];
+                           @"velocity": SAFE_VELOCITY(velocity)}];
 }
 
 + (RNGestureHandlerEventExtraData *)forRotation:(CGFloat)rotation
                                 withAnchorPoint:(CGPoint)anchorPoint
                                    withVelocity:(CGFloat)velocity
-                            withNumberOfTouches:(NSUInteger)numberOfTouches
 {
     return [[RNGestureHandlerEventExtraData alloc]
             initWithData:@{@"rotation": @(rotation),
                            @"anchorX": @(anchorPoint.x),
                            @"anchorY": @(anchorPoint.y),
-                           @"velocity": SAFE_VELOCITY(velocity),
-                           @"numberOfTouches": @(numberOfTouches)}];
+                           @"velocity": SAFE_VELOCITY(velocity)}];
 }
 
 + (RNGestureHandlerEventExtraData *)forPointerInside:(BOOL)pointerInside;

@@ -16,16 +16,13 @@
 + (RNGestureHandlerEventExtraData *)forPan:(CGPoint)position
                       withAbsolutePosition:(CGPoint)absolutePosition
                            withTranslation:(CGPoint)translation
-                              withVelocity:(CGPoint)velocity
-                       withNumberOfTouches:(NSUInteger)numberOfTouches;
+                              withVelocity:(CGPoint)velocity;
 + (RNGestureHandlerEventExtraData *)forPinch:(CGFloat)scale
                               withFocalPoint:(CGPoint)focalPoint
-                                withVelocity:(CGFloat)velocity
-                            withNumberOfTouches:(NSUInteger)numberOfTouches;
+                                withVelocity:(CGFloat)velocity;
 + (RNGestureHandlerEventExtraData *)forRotation:(CGFloat)rotation
                                 withAnchorPoint:(CGPoint)anchorPoint
-                                   withVelocity:(CGFloat)velocity
-                            withNumberOfTouches:(NSUInteger)numberOfTouches;
+                                   withVelocity:(CGFloat)velocity;
 + (RNGestureHandlerEventExtraData *)forPointerInside:(BOOL)pointerInside;
 
 @end
