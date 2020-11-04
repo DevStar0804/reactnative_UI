@@ -102,15 +102,6 @@
     }
 }
 
-- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
-{
-    if (self.state == UIGestureRecognizerStateChanged) {
-        self.state = UIGestureRecognizerStateEnded;
-    } else {
-        self.state = UIGestureRecognizerStateFailed;
-    }
-}
-
 - (void)reset
 {
     self.enabled = YES;
@@ -219,8 +210,7 @@
             forPan:[recognizer locationInView:recognizer.view]
             withAbsolutePosition:[recognizer locationInView:recognizer.view.window]
             withTranslation:[recognizer translationInView:recognizer.view]
-            withVelocity:[recognizer velocityInView:recognizer.view.window]
-            withNumberOfTouches:recognizer.numberOfTouches];
+            withVelocity:[recognizer velocityInView:recognizer.view.window]];
 }
 
 @end
