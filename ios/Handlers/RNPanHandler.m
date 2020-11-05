@@ -210,7 +210,8 @@
             forPan:[recognizer locationInView:recognizer.view]
             withAbsolutePosition:[recognizer locationInView:recognizer.view.window]
             withTranslation:[recognizer translationInView:recognizer.view]
-            withVelocity:[recognizer velocityInView:recognizer.view.window]];
+            withVelocity:[recognizer velocityInView:recognizer.view.window]
+            withNumberOfTouches:recognizer.numberOfTouches];
 }
 
 @end
